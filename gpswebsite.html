@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get GPS Location</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    /* Set the map container size */
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<button onclick="getLocation()">Get Location</button>
+
+<!-- Display location information -->
+<p id="locationInfo"></p>
+
+<!-- Display the Leaflet Map -->
+<div id="map"></div>
+
+<script>
+function getLocation() {
+  if (navigator.geolocation) {
+    // Request high accuracy for better location precision
+    navigator.geolocation.getCurrentPosition(showPosition, showError, { enableHighAccuracy: true });
+  } else {
+    document.getElementById("locationInfo").innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function showPosition(position) {
+  var latitude = position.coords.latitude;
+  var longitude = position.coords.longitude;
+
+  // Use reverse geocoding to get a human-readable address
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`)
+    .then(response => response.json())
+    .then(data => {
+      var address = data.display_name;
+      document.getElementById("locationInfo").innerHTML = "Location: " + address;
+    })
+    .catch(error => console.error('Error during reverse geocoding:', error));
+
+  // Display the Leaflet Map
+  showMap(latitude, longitude);
+}
+
+function showError(error) {
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      document.getElementById("locationInfo").innerHTML = "User denied the request for geolocation.";
+      break;
+    case error.POSITION_UNAVAILABLE:
+      document.getElementById("locationInfo").innerHTML = "Location information is unavailable.";
+      break;
+    case error.TIMEOUT:
+      document.getElementById("locationInfo").innerHTML = "The request to get user location timed out.";
+      break;
+    case error.UNKNOWN_ERROR:
+      document.getElementById("locationInfo").innerHTML = "An unknown error occurred.";
+      break;
+  }
+}
+
+function showMap(latitude, longitude) {
+  // Create a Leaflet map centered on the user's location
+  var map = L.map('map').setView([latitude, longitude], 16);  // Adjust the zoom level
+
+  // Add OpenStreetMap tiles to the map
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Add a marker for the user's location
+  L.marker([latitude, longitude]).addTo(map)
+    .bindPopup('Your Location')
+    .openPopup();
+}
+</script>
+
+</body>
+</html>
