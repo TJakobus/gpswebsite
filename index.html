@@ -16,8 +16,6 @@
 </head>
 <body>
 
-<button onclick="getLocation()">Get Location</button>
-
 <!-- Display location information -->
 <p id="locationInfo"></p>
 
@@ -25,7 +23,7 @@
 <div id="map"></div>
 
 <script>
-function getLocation() {
+function initMap() {
   if (navigator.geolocation) {
     // Request high accuracy for better location precision
     navigator.geolocation.getCurrentPosition(showPosition, showError, { enableHighAccuracy: true });
@@ -82,6 +80,9 @@ function showMap(latitude, longitude) {
     .bindPopup('Your Location')
     .openPopup();
 }
+
+// Call initMap when the document is ready
+document.addEventListener('DOMContentLoaded', initMap);
 </script>
 
 </body>
